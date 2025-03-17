@@ -1,6 +1,3 @@
-# Created by patrickloeber
-# https://github.com/patrickloeber/snake-ai-pytorch/blob/main/snake_game_human.py
-
 import pygame
 import random
 from enum import Enum
@@ -30,7 +27,7 @@ BLUE2 = (0, 100, 255)
 BLACK = (0, 0, 0)
 
 BLOCK_SIZE = 20
-SPEED = 20
+SPEED = 40
 
 
 class SnakeGameAI:
@@ -97,10 +94,8 @@ class SnakeGameAI:
     def is_collision(self, point=None):
         if point is None:
             point = self.head
-        # hits boundary
         if point.x > self.w - BLOCK_SIZE or point.x < 0 or point.y > self.h - BLOCK_SIZE or point.y < 0:
             return True
-        # hits itself
         if point in self.snake[1:]:
             return True
 
@@ -122,10 +117,11 @@ class SnakeGameAI:
     def _move(self, action):
 
         clock_wise = [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]
-        i = clock_wise.index(action)
+        i = clock_wise.index(self.direction)
+
         if np.array_equal(action, [1, 0, 0]):
             new_dir = clock_wise[i]
-        if np.array_equal(action, [0, 1, 0]):
+        elif np.array_equal(action, [0, 1, 0]):
             next_i = (i + 1) % 4
             new_dir = clock_wise[next_i]
         else:

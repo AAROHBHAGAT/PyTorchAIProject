@@ -1,8 +1,10 @@
 import torch
 import random
 import numpy as np
-from snake_game_ai import SnakeGameAI, Direction, Point
 from collections import deque
+from snake_game_ai import SnakeGameAI, Direction, Point
+from model import Linear_QNet, QTrainer
+from helper import plot
 
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
@@ -13,10 +15,10 @@ class Agent:
     def __init__(self):
         self.num_games = 0
         self.epsilon = 0
-        self.gamma = 0
+        self.gamma = 0.9
         self.memory = deque(maxlen=MAX_MEMORY)
-        self.model = None
-        self.trainer = None
+        self.model = Linear_QNet(11, 256, 3)
+        self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
     def get_state(self, game):
         head = game.snake[0]
@@ -62,8 +64,8 @@ class Agent:
     def remember(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
 
-    def train_long_memory(self, states, actions, rewards, next_states, dones):
-        if len(self.memory) < BATCH_SIZE:
+    def train_long_memory(self):
+        if len(self.memory) > BATCH_SIZE:
             mini_sample = random.sample(self.memory, BATCH_SIZE)
         else:
             mini_sample = self.memory
@@ -107,15 +109,15 @@ def train():
 
             if score > record_score:
                 record_score = score
-                # agent.model.save()
+                agent.model.save()
 
             print('Game', agent.num_games, 'Score', score, 'Record', record_score)
 
-            # plot_scores.append(score)
-            # total_score += score
-            # mean_score = total_score / agent.n_games
-            # plot_mean_scores.append(mean_score)
-            # plot(plot_scores, plot_mean_scores)
+            plot_scores.append(score)
+            total_score += score
+            mean_score = total_score / agent.num_games
+            plot_mean_scores.append(mean_score)
+            plot(plot_scores, plot_mean_scores)
 
 if __name__ == '__main__':
     train()
